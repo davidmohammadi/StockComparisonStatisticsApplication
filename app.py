@@ -15,15 +15,6 @@ start_date = '2015-01-01'
 end_date = '2020-01-01'
 data_provider = 'yahoo'
 
-# fig = make_subplots(rows=2, cols=1, specs=[[{}], [{}]],
-#                         shared_xaxes=True, shared_yaxes=False,
-#                         vertical_spacing=0.03, )
-#
-#     fig.append_trace(trace_stock_1, 1, 1)
-#     fig.append_trace(trace_stock_2, 2, 1)
-#     fig['layout'].update(height=600, title='Stacked Subplots with Shared X-Axes')
-#     fig.update_layout(legend_orientation="h")
-
 # ===== initialize the app =====
 app = dash.Dash(__name__)
 
@@ -42,14 +33,18 @@ app.layout = html.Div([
     html.Div([
         dcc.Input(
             id="stock2-input",
-            value="^GSPC",
             type="text",
+            value="^GSPC"
         ),
         dcc.Input(
             id="stock1-input",
-            value="MSFT",
             type="text",
+            value="MSFT"
         ),
+        html.Button(
+            id='submit-button',
+            n_clicks=0,
+            children='submit')
     ]),
 ])
 
@@ -59,10 +54,11 @@ app.css.append_css({
 
 
 @app.callback(
-    dash.dependencies.Output("2-stock-subplot", "figure"),
-    [dash.dependencies.Input("stock1-input", "value"), dash.dependencies.Input("stock2-input", "value")],
+    Output("2-stock-subplot", "figure"),
+    [Input("submit-button", "n_clicks")],
+    [State("stock1-input", "value"), State("stock2-input", "value")]
 )
-def update_fig(input_stock_1, input_stock_2):
+def update_fig(n_clicks, input_stock_1, input_stock_2):
     df_stocks = pd.DataFrame()
     list_of_companies = [input_stock_2, input_stock_1]
 
@@ -101,7 +97,6 @@ def update_fig(input_stock_1, input_stock_2):
                          # title="Graph Comparison: " + str(list_of_companies[0] + " & " + str(list_of_companies[1])),
                          )
     fig.update_layout(legend_orientation="h")
-
     return fig
 
 

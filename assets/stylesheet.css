@@ -23,3 +23,9 @@ this acts as a static directory, a place to store all static files
     right: 10px;
     height: 75px;
 }
+
+.stock_input {
+    position: relative;
+    float: right;
+    left: 5px;
+}
