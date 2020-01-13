@@ -11,26 +11,28 @@ import dash_html_components as html
 from dash.dependencies import Output, Input, State
 
 # ===== backend code =====
-start_date = '2015-01-01'
-end_date = '2020-01-01'
-data_provider = 'yahoo'
+
 
 # ===== initialize the app =====
 app = dash.Dash(__name__)
 
 app.layout = html.Div([
+    # Header
     html.Div([
         html.H2("Stock Statistics Application created by David Mohammadi"),
         html.Img(src='/assets/dm_headshot.jpg')
     ], className="banner"),
 
+    # Graph Output
     html.Div([
         html.Div([
             dcc.Graph(
                 id='2-stock-subplot'),
         ])
     ]),
+    # Stock Ticker Input
     html.Div([
+        html.Plaintext("Stock Tickers"),
         dcc.Input(
             id="stock2-input",
             type="text",
@@ -41,11 +43,29 @@ app.layout = html.Div([
             type="text",
             value="MSFT"
         ),
-        html.Button(
-            id='submit-button',
-            n_clicks=0,
-            children='submit')
     ]),
+    # Date Input
+    html.Plaintext("Date (YEAR-MONTH-DAY)"),
+    html.Div([
+        dcc.Input(
+            id="start-date-input",
+            type="text",
+            value='2015-01-01'
+        ),
+        dcc.Input(
+            id="end-date-input",
+            type="text",
+            value='2020-01-01'
+        ),
+    ]),
+    # Submit button
+    html.Div([
+        html.Button(
+            id='stock-submit-button',
+            n_clicks=0,
+            children='Submit',
+            className="ticker-date-submit-button")
+    ])
 ])
 
 app.css.append_css({
@@ -55,12 +75,17 @@ app.css.append_css({
 
 @app.callback(
     Output("2-stock-subplot", "figure"),
-    [Input("submit-button", "n_clicks")],
-    [State("stock1-input", "value"), State("stock2-input", "value")]
+    # Callback input of stock tickers
+    [Input("stock-submit-button", "n_clicks")],
+    [State("stock1-input", "value"), State("stock2-input", "value"),
+     State("start-date-input", "value"), State("end-date-input", "value")],
 )
-def update_fig(n_clicks, input_stock_1, input_stock_2):
+def update_fig(n_clicks, input_stock_1, input_stock_2, input_date_start, input_date_end):
     df_stocks = pd.DataFrame()
     list_of_companies = [input_stock_2, input_stock_1]
+    start_date = input_date_start
+    end_date = input_date_end
+    data_provider = 'yahoo'
 
     for company in list_of_companies:
         df = DataReader(name=company,
