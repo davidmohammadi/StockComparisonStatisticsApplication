@@ -1,0 +1,25 @@
+/*
+this acts as a static directory, a place to store all static files
+*/
+
+.banner {
+    height: 75px;
+    margin: 0px -10px 10px;
+    background-color: rgb(19,41,75);
+    border-radius 2px;
+    color: rgb(255, 255, 255);
+}
+
+.banner h2{
+    color: white
+    padding-top: 10px;
+    margin-left: 2%;
+    display: inline-block;
+}
+
+.banner Img{
+    position: relative;
+    float: right;
+    right: 10px;
+    height: 75px;
+}
