@@ -7,6 +7,7 @@ from plotly.subplots import make_subplots
 from pandas_datareader.data import DataReader
 
 import dash
+import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Output, Input, State
@@ -65,7 +66,6 @@ def create_financial_statistics(start_date, end_date, df_stocks, list_of_compani
 
     # Annualized Volatility
     df_annualized_vol = (df_stock_returns.std() * np.sqrt(250)).to_frame().transpose()
-    df_annualized_vol.rename(index={0: "annualized volatility"})
     df_fin_stats = pd.concat([df_fin_stats, df_annualized_vol])
 
     # Assumed risk free rate
@@ -76,8 +76,9 @@ def create_financial_statistics(start_date, end_date, df_stocks, list_of_compani
     df_fin_stats = pd.concat([df_fin_stats, df_sharpe_ratio])
 
     # Rename DataFrame indexes for readability
-    df_fin_stats.index = ['Total Return ', 'Annualized Return', 'Annualized Volatility', 'Sharpe Ratio']
-    # print(df_fin_stats)
+    df_fin_stats['Indicators (decimal)'] = ['Total Return ', 'Annualized Return', 'Annualized Volatility',
+                                            'Sharpe Ratio']
+    df_fin_stats = df_fin_stats[['Indicators (decimal)', list_of_companies_reversed[0], list_of_companies_reversed[1]]]
 
     return df_fin_stats
 
@@ -98,10 +99,10 @@ app.layout = html.Div([
             dcc.Graph(
                 id='2-stock-subplot'),
         ]),
-        html.Div([
-            # call generate_html_table
-           # generate_html_table()
-        ])
+        html.Div(
+            id='2-stock-df',
+        )
+
     ]),
     # Stock Ticker Input
     html.Div([
@@ -118,7 +119,7 @@ app.layout = html.Div([
         ),
     ]),
     # Date Input
-    html.Plaintext("Date (YEAR-MONTH-DAY)"),
+    html.Plaintext("Date (YYYY-MM-DD)"),
     html.Div([
         dcc.Input(
             id="start-date-input",
@@ -147,7 +148,7 @@ app.css.append_css({
 
 
 @app.callback(
-    Output("2-stock-subplot", "figure"),
+    [Output("2-stock-subplot", "figure"), Output("2-stock-df", "children")],
     [Input("stock-submit-button", "n_clicks")],
     [State("stock1-input", "value"), State("stock2-input", "value"),
      State("start-date-input", "value"), State("end-date-input", "value")],
@@ -179,64 +180,22 @@ def update_fig(n_clicks, input_stock_1, input_stock_2, input_date_start, input_d
                          # title="Graph Comparison: " + str(list_of_companies[0] + " & " + str(list_of_companies[1]))
                          )
     fig.update_layout(legend_orientation="h")
-    return fig
 
+    df_fin_stats = (
+        create_financial_statistics(start_date=input_date_start, end_date=input_date_end, df_stocks=df_stock_price,
+                                    list_of_companies=list_of_companies))
 
-# @app.callback(
-#     Output("2-stock-subplot", "figure"),
-#     [Input("stock-submit-button", "n_clicks")],
-#     [State("stock1-input", "value"), State("stock2-input", "value"),
-#      State("start-date-input", "value"), State("end-date-input", "value")],
-# )
-# def generate_html_table(n_clicks, input_stock_1, input_stock_2, input_date_start, input_date_end):
-#     df_stocks = pd.DataFrame()
-#     data_provider = 'yahoo'
-#
-#     # Inputted from callback
-#     list_of_companies = [input_stock_2, input_stock_1]
-#     start_date = input_date_start
-#     end_date = input_date_end
-#
-#     for company in list_of_companies:
-#         df = DataReader(name=company,
-#                         data_source=data_provider,
-#                         start=start_date,
-#                         end=end_date).reset_index()
-#         df["ticker"] = company
-#         df_stocks = pd.concat([df_stocks, df])
-#
-#     df_stocks.reset_index(drop=True, inplace=True)
-#
-#     df_stock_price = pd.pivot(df_stocks, index='Date', columns='ticker', values='Close')
-#     df_stock_price = pd.DataFrame(df_stock_price.to_records())
-#     df_stock_price.set_index('Date', inplace=True)
-#
-#     df_html_table = create_financial_statistics(start_date=start_date, end_date=end_date, df_stocks=df_stock_price,
-#                                                 list_of_companies=list_of_companies)
-#     return html.Div(
-#         [
-#             html.Div(
-#                 html.Table(
-#                     # Header
-#                     [html.Tr([html.Th()])]
-#                     +
-#                     # Body
-#                     [
-#                         html.Tr(
-#                             [
-#                                 html.Td(
-#                                     html.A(
-#                                         ##
-#                                     )
-#                                 )
-#                             ]
-#                         )
-#                     ]
-#                 )
-#             )
-#         ]
-#     )
-#
+    return fig, html.Div([
+        dash_table.DataTable(
+            id='table',
+            columns=[{"name": i, "id": i} for i in df_fin_stats.columns],
+            data=df_fin_stats.to_dict("rows"),
+            style_cell={'width': '300px',
+                        'height': '60px',
+                        'textAlign': 'left'},
+        )
+    ])
+
 
 if __name__ == "__main__":
     app.run_server(debug=True)
