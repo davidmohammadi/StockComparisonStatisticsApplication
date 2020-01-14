@@ -88,16 +88,6 @@ def create_financial_statistics(start_date, end_date, df_stocks, list_of_compani
 
 
 # ===== initialize the app =====
-# external_stylesheets = [
-#     'https://codepen.io/chriddyp/pen/bWLwgP.css',
-#     {
-#         'href': 'https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css',
-#         'rel': 'stylesheet',
-#         'integrity': 'sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO',
-#         'crossorigin': 'anonymous'
-#     }
-# ]
-
 app = dash.Dash(__name__,
                 #   external_stylesheets=external_stylesheets
                 )
@@ -146,18 +136,17 @@ app.layout = html.Div([
         )
     ], className="ticker-date-submit-button"),
 
-    # Graph Output
+    # Visual Output
     html.Div([
         html.Div([
             dcc.Graph(
                 id='2-stock-subplot'),
         ], ),
+        html.Div(
+            id='2-stock-df',
+        ),
     ]),
-    html.Div(
-        id='2-stock-df',
-    )
-
-])
+], style={'padding': '0px 20px 20px 20px'})
 
 
 @app.callback(
@@ -189,9 +178,7 @@ def update_fig(n_clicks, input_stock_1, input_stock_2, input_date_start, input_d
 
     fig.append_trace(trace_stock_1, 2, 1)
     fig.append_trace(trace_stock_2, 1, 1)
-    fig['layout'].update(height=600, width=1200
-                         # title="Graph Comparison: " + str(list_of_companies[0] + " & " + str(list_of_companies[1]))
-                         )
+    fig['layout'].update(height=600, width=1200)
     fig.update_layout(legend_orientation="h")
 
     df_fin_stats = (
@@ -204,7 +191,6 @@ def update_fig(n_clicks, input_stock_1, input_stock_2, input_date_start, input_d
             columns=[{"name": i, "id": i} for i in df_fin_stats.columns],
             data=df_fin_stats.to_dict("rows"),
             style_table={'width': '1000px',
-                         'height': '60px',
                          'textAlign': 'center'},
             style_as_list_view=True,
             style_header={
