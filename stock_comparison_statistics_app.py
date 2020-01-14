@@ -75,12 +75,27 @@ def create_financial_statistics(start_date, end_date, df_stocks, list_of_compani
     df_sharpe_ratio = (df_annualized_return - risk_free_rate_decimal) / df_annualized_vol
     df_fin_stats = pd.concat([df_fin_stats, df_sharpe_ratio])
 
+    # Negative Returns Only (For Sortino Ratio)
+    target_return = 0
+    df_negative_returns = df_stock_returns[df_stock_returns < target_return]
+
+    # Standard Deviation of Negative Returns (For Sortino Ratio)
+    df_negative_returns_stdev = pd.Series(df_negative_returns.std()).to_frame().transpose()
+
+    # Sortino Ratio -CURRENTLY BELIEVED TO BE CALCULATED INCORRECTLY-
+    df_sortino_ratio = (pd.Series(
+        df_stock_returns.mean()).to_frame().transpose() - risk_free_rate_decimal) / df_negative_returns_stdev
+    # df_fin_stats = pd.concat([df_fin_stats, df_sortino_ratio])
+
     # Rename DataFrame indexes for readability
     df_fin_stats['Assumed Risk Free Rate: ' +
-                 str(risk_free_rate_decimal * 100) + '%'] = ['Total Return (decimal)',
-                                                             'Annualized Return (decimal)',
-                                                             'Annualized Volatility (decimal)',
-                                                             'Sharpe Ratio']
+                 str(risk_free_rate_decimal * 100) + '%'] = [
+        'Total Return (Decimal)',
+        'Annualized Return (Decimal)',
+        'Annualized Volatility (Decimal)',
+        'Sharpe Ratio (Annualized)',
+        # 'Sortino Ratio',
+    ]
     df_fin_stats = df_fin_stats[
         ['Assumed Risk Free Rate: ' + str(risk_free_rate_decimal * 100) + '%', list_of_companies_reversed[0],
          list_of_companies_reversed[1]]]
