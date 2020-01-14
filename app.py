@@ -76,34 +76,39 @@ def create_financial_statistics(start_date, end_date, df_stocks, list_of_compani
     df_fin_stats = pd.concat([df_fin_stats, df_sharpe_ratio])
 
     # Rename DataFrame indexes for readability
-    df_fin_stats['Indicators (decimal)'] = ['Total Return ', 'Annualized Return', 'Annualized Volatility',
-                                            'Sharpe Ratio']
-    df_fin_stats = df_fin_stats[['Indicators (decimal)', list_of_companies_reversed[0], list_of_companies_reversed[1]]]
+    df_fin_stats['Assumed Risk Free Rate: ' + str(risk_free_rate * 100) + '%'] = ['Total Return (decimal)',
+                                                                                  'Annualized Return (decimal)',
+                                                                                  'Annualized Volatility (decimal)',
+                                                                                  'Sharpe Ratio']
+    df_fin_stats = df_fin_stats[
+        ['Assumed Risk Free Rate: ' + str(risk_free_rate * 100) + '%', list_of_companies_reversed[0],
+         list_of_companies_reversed[1]]]
 
     return df_fin_stats
 
 
 # ===== initialize the app =====
-app = dash.Dash(__name__)
+# external CSS stylesheets (https://dash.plot.ly/external-resources)
+external_stylesheets = [
+    'https://codepen.io/chriddyp/pen/bWLwgP.css',
+    {
+        'href': 'https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css',
+        'rel': 'stylesheet',
+        'integrity': 'sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO',
+        'crossorigin': 'anonymous'
+    }
+]
+
+app = dash.Dash(__name__,
+                external_stylesheets=external_stylesheets)
 
 app.layout = html.Div([
     # Header
     html.Div([
-        html.H2("Stock Statistics Application created by David Mohammadi"),
+        html.H2("Stock Statistics Application created by David Mohammadi (github.com/davidmohammadi)"),
         html.Img(src='/assets/dm_headshot.jpg')
     ], className="banner"),
 
-    # Graph Output
-    html.Div([
-        html.Div([
-            dcc.Graph(
-                id='2-stock-subplot'),
-        ]),
-        html.Div(
-            id='2-stock-df',
-        )
-
-    ]),
     # Stock Ticker Input
     html.Div([
         html.Plaintext("Stock Tickers"),
@@ -117,10 +122,6 @@ app.layout = html.Div([
             type="text",
             value="MSFT"
         ),
-    ]),
-    # Date Input
-    html.Plaintext("Date (YYYY-MM-DD)"),
-    html.Div([
         dcc.Input(
             id="start-date-input",
             type="text",
@@ -132,19 +133,61 @@ app.layout = html.Div([
             value='2020-01-01'
         ),
     ]),
+
+    # Date Input
+    # html.Plaintext("Date (YYYY-MM-DD)"),
+    # html.Div([
+    #     dcc.Input(
+    #         id="start-date-input",
+    #         type="text",
+    #         value='2015-01-01'
+    #     ),
+    #     dcc.Input(
+    #         id="end-date-input",
+    #         type="text",
+    #         value='2020-01-01'
+    #     ),
+    # ], className="row"),
+
     # Submit button
     html.Div([
         html.Button(
             id='stock-submit-button',
             n_clicks=0,
             children='Submit',
-            className="ticker-date-submit-button")
+        )
+    ]),
+
+    # Graph Output
+    # html.Div([
+    #     html.Div([
+    #         dcc.Graph(
+    #             id='2-stock-subplot'),
+    #     ], className="six columns"),
+    #     html.Div(
+    #         id='2-stock-df',
+    #         className="six columns"
+    #     ),
+    # ]),
+    html.Div([
+        html.Div([
+            html.H3('Column 1'),
+            html.Div(
+                id='2-stock-df',
+            ),
+        ], ),
+        html.Div([
+            html.H3('Column 2'),
+            dcc.Graph(
+                id='2-stock-subplot'),
+        ], )
     ])
 ])
 
-app.css.append_css({
-    'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'
-})
+
+# app.css.append_css({
+#     'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'
+# })
 
 
 @app.callback(
@@ -176,9 +219,9 @@ def update_fig(n_clicks, input_stock_1, input_stock_2, input_date_start, input_d
 
     fig.append_trace(trace_stock_1, 2, 1)
     fig.append_trace(trace_stock_2, 1, 1)
-    fig['layout'].update(height=600,
-                         # title="Graph Comparison: " + str(list_of_companies[0] + " & " + str(list_of_companies[1]))
-                         )
+    fig['layout'].update(  # height=600, width=1200
+        # title="Graph Comparison: " + str(list_of_companies[0] + " & " + str(list_of_companies[1]))
+    )
     fig.update_layout(legend_orientation="h")
 
     df_fin_stats = (
@@ -190,9 +233,20 @@ def update_fig(n_clicks, input_stock_1, input_stock_2, input_date_start, input_d
             id='table',
             columns=[{"name": i, "id": i} for i in df_fin_stats.columns],
             data=df_fin_stats.to_dict("rows"),
-            style_cell={'width': '300px',
-                        'height': '60px',
-                        'textAlign': 'left'},
+            style_table={  # 'width': '1000px',
+                'height': '600px',
+                'textAlign': 'center'},
+            style_as_list_view=True,
+            style_header={
+                'backgroundColor': 'white',
+                'fontWeight': 'bold'
+            },
+            style_cell_conditional=[
+                {
+                    'textAlign': 'center'
+                }
+            ],
+            style_cell={'fontSize': 20, },
         )
     ])
 
