@@ -102,18 +102,23 @@ app.layout = html.Div([
 
     # Stock Ticker Input
     html.Div([
-        html.Plaintext("Stock Tickers"),
-        dcc.Input(
-            id="stock2-input",
-            type="text",
-            value="^GSPC"
-        ),
-        dcc.Input(
-            id="stock1-input",
-            type="text",
-            value="MSFT"
-        ),
-        html.Plaintext("Date (YYYY-MM-DD)"),
+        # currently using PlainText for spacing instead of HTML styling
+        html.Plaintext(""),
+        html.Label(['Stock Tickers:']),
+        html.Div([
+            dcc.Input(
+                id="stock2-input",
+                type="text",
+                value="^GSPC"
+            ),
+            dcc.Input(
+                id="stock1-input",
+                type="text",
+                value="MSFT"
+            ),
+        ]),
+        html.Plaintext(""),
+        html.Label(['Date Range (YYYY-MM-DD):']),
         html.Div([
             dcc.Input(
                 id="start-date-input",
@@ -126,18 +131,19 @@ app.layout = html.Div([
                 value='2020-01-01'
             ),
         ]),
-        # currently using plaintext for spacing instead of HTML styling
         html.Plaintext(""),
         html.Label([
-            html.A("Risk Free Rate (include %)",
+            html.A("Risk Free Rate (include %):",
                    href='https://www.treasury.gov/resource-center/data-chart-center/interest-rates/pages/textview.aspx?data=yield',
                    target='_blank')
         ]),
-        dcc.Input(
-            id="risk-free-rate-string",
-            type="text",
-            value='1.52%'
-        ),
+        html.Div([
+            dcc.Input(
+                id="risk-free-rate-string",
+                type="text",
+                value='1.52%'
+            ),
+        ]),
         # currently using plaintext for spacing instead of HTML styling
         html.Plaintext(""),
     ], className="stock_input"),
