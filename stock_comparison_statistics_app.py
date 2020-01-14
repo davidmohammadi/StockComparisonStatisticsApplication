@@ -40,7 +40,7 @@ def pull_stock_data(input_stock_1, input_stock_2, input_date_start, input_date_e
     return df_stock_price
 
 
-def create_financial_statistics(start_date, end_date, df_stocks, list_of_companies):
+def create_financial_statistics(start_date, end_date, df_stocks, list_of_companies, risk_free_rate_percent):
     list_of_companies_reversed = list([list_of_companies[1], list_of_companies[0]])
     df_fin_stats = pd.DataFrame(columns=list_of_companies_reversed)
     df_stock_returns = df_stocks.pct_change()
@@ -69,19 +69,20 @@ def create_financial_statistics(start_date, end_date, df_stocks, list_of_compani
     df_fin_stats = pd.concat([df_fin_stats, df_annualized_vol])
 
     # Assumed risk free rate
-    risk_free_rate = 0.0152
+    risk_free_rate_decimal = risk_free_rate_percent * 0.01
 
     # Sharpe Ratio
-    df_sharpe_ratio = (df_annualized_return - risk_free_rate) / df_annualized_vol
+    df_sharpe_ratio = (df_annualized_return - risk_free_rate_decimal) / df_annualized_vol
     df_fin_stats = pd.concat([df_fin_stats, df_sharpe_ratio])
 
     # Rename DataFrame indexes for readability
-    df_fin_stats['Assumed Risk Free Rate: ' + str(risk_free_rate * 100) + '%'] = ['Total Return (decimal)',
-                                                                                  'Annualized Return (decimal)',
-                                                                                  'Annualized Volatility (decimal)',
-                                                                                  'Sharpe Ratio']
+    df_fin_stats['Assumed Risk Free Rate: ' +
+                 str(risk_free_rate_decimal * 100) + '%'] = ['Total Return (decimal)',
+                                                             'Annualized Return (decimal)',
+                                                             'Annualized Volatility (decimal)',
+                                                             'Sharpe Ratio']
     df_fin_stats = df_fin_stats[
-        ['Assumed Risk Free Rate: ' + str(risk_free_rate * 100) + '%', list_of_companies_reversed[0],
+        ['Assumed Risk Free Rate: ' + str(risk_free_rate_decimal * 100) + '%', list_of_companies_reversed[0],
          list_of_companies_reversed[1]]]
 
     return df_fin_stats
@@ -124,7 +125,21 @@ app.layout = html.Div([
                 type="text",
                 value='2020-01-01'
             ),
-        ])
+        ]),
+        # currently using plaintext for spacing instead of HTML styling
+        html.Plaintext(""),
+        html.Label([
+            html.A("Risk Free Rate (include %)",
+                   href='https://www.treasury.gov/resource-center/data-chart-center/interest-rates/pages/textview.aspx?data=yield',
+                   target='_blank')
+        ]),
+        dcc.Input(
+            id="risk-free-rate-string",
+            type="text",
+            value='1.52%'
+        ),
+        # currently using plaintext for spacing instead of HTML styling
+        html.Plaintext(""),
     ], className="stock_input"),
 
     # Submit button
@@ -142,6 +157,7 @@ app.layout = html.Div([
             dcc.Graph(
                 id='2-stock-subplot'),
         ], ),
+
         html.Div(
             id='2-stock-df',
         ),
@@ -153,9 +169,10 @@ app.layout = html.Div([
     [Output("2-stock-subplot", "figure"), Output("2-stock-df", "children")],
     [Input("stock-submit-button", "n_clicks")],
     [State("stock1-input", "value"), State("stock2-input", "value"),
-     State("start-date-input", "value"), State("end-date-input", "value")],
+     State("start-date-input", "value"), State("end-date-input", "value"),
+     State("risk-free-rate-string", "value")],
 )
-def update_fig(n_clicks, input_stock_1, input_stock_2, input_date_start, input_date_end):
+def update_fig(n_clicks, input_stock_1, input_stock_2, input_date_start, input_date_end, risk_free_rate_string):
     df_stock_price = pull_stock_data(input_stock_1=input_stock_1, input_stock_2=input_stock_2,
                                      input_date_start=input_date_start,
                                      input_date_end=input_date_end)
@@ -181,9 +198,11 @@ def update_fig(n_clicks, input_stock_1, input_stock_2, input_date_start, input_d
     fig['layout'].update(height=600, width=1200)
     fig.update_layout(legend_orientation="h")
 
+    risk_free_rate_percent = float(risk_free_rate_string[0:-1])
+
     df_fin_stats = (
         create_financial_statistics(start_date=input_date_start, end_date=input_date_end, df_stocks=df_stock_price,
-                                    list_of_companies=list_of_companies))
+                                    list_of_companies=list_of_companies, risk_free_rate_percent=risk_free_rate_percent))
 
     return fig, html.Div([
         dash_table.DataTable(
@@ -201,7 +220,12 @@ def update_fig(n_clicks, input_stock_1, input_stock_2, input_date_start, input_d
                 {
                     'textAlign': 'center'
                 }
-            ]
+            ],
+            style_cell=
+            {
+                'font_size': '16px'
+            }
+
         )
     ])
 
