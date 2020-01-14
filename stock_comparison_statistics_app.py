@@ -64,7 +64,7 @@ def create_financial_statistics(start_date, end_date, df_stocks, list_of_compani
     df_annualized_return = (df_total_return + 1) ** (1 / years) - 1
     df_fin_stats = pd.concat([df_fin_stats, df_annualized_return])
 
-    # Annualized Volatility
+    # Annualized Volatility (Standard Deviation)
     df_annualized_vol = (df_stock_returns.std() * np.sqrt(250)).to_frame().transpose()
     df_fin_stats = pd.concat([df_fin_stats, df_annualized_vol])
 
@@ -92,7 +92,7 @@ def create_financial_statistics(start_date, end_date, df_stocks, list_of_compani
                  str(risk_free_rate_decimal * 100) + '%'] = [
         'Total Return (Decimal)',
         'Annualized Return (Decimal)',
-        'Annualized Volatility (Decimal)',
+        'Annualized Standard Deviation (Decimal)',
         'Sharpe Ratio (Annualized)',
         # 'Sortino Ratio',
     ]
