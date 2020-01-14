@@ -4,17 +4,17 @@ Using pandas_datareader and yahoo finance on the backend, this application allow
 statistics on a stock's price given a specified time-frame. 
 
 # Required Python packages
-import pandas as pd
-import numpy as np
-from datetime import date, datetime
+- import pandas as pd
+- import numpy as np
+- from datetime import date, datetime
 
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-from pandas_datareader.data import DataReader
+- import plotly.graph_objects as go
+- from plotly.subplots import make_subplots
+- from pandas_datareader.data import DataReader
 
-import dash
-import dash_table
-import dash_core_components as dcc
-import dash_html_components as html
-from dash.dependencies import Output, Input, State
+- import dash
+- import dash_table
+- import dash_core_components as dcc
+- import dash_html_components as html
+- from dash.dependencies import Output, Input, State
 
