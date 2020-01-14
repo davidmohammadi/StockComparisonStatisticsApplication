@@ -88,19 +88,19 @@ def create_financial_statistics(start_date, end_date, df_stocks, list_of_compani
 
 
 # ===== initialize the app =====
-# external CSS stylesheets (https://dash.plot.ly/external-resources)
-external_stylesheets = [
-    'https://codepen.io/chriddyp/pen/bWLwgP.css',
-    {
-        'href': 'https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css',
-        'rel': 'stylesheet',
-        'integrity': 'sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO',
-        'crossorigin': 'anonymous'
-    }
-]
+# external_stylesheets = [
+#     'https://codepen.io/chriddyp/pen/bWLwgP.css',
+#     {
+#         'href': 'https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css',
+#         'rel': 'stylesheet',
+#         'integrity': 'sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO',
+#         'crossorigin': 'anonymous'
+#     }
+# ]
 
 app = dash.Dash(__name__,
-                external_stylesheets=external_stylesheets)
+                #   external_stylesheets=external_stylesheets
+                )
 
 app.layout = html.Div([
     # Header
@@ -122,32 +122,20 @@ app.layout = html.Div([
             type="text",
             value="MSFT"
         ),
-        dcc.Input(
-            id="start-date-input",
-            type="text",
-            value='2015-01-01'
-        ),
-        dcc.Input(
-            id="end-date-input",
-            type="text",
-            value='2020-01-01'
-        ),
-    ]),
-
-    # Date Input
-    # html.Plaintext("Date (YYYY-MM-DD)"),
-    # html.Div([
-    #     dcc.Input(
-    #         id="start-date-input",
-    #         type="text",
-    #         value='2015-01-01'
-    #     ),
-    #     dcc.Input(
-    #         id="end-date-input",
-    #         type="text",
-    #         value='2020-01-01'
-    #     ),
-    # ], className="row"),
+        html.Plaintext("Date (YYYY-MM-DD)"),
+        html.Div([
+            dcc.Input(
+                id="start-date-input",
+                type="text",
+                value='2015-01-01'
+            ),
+            dcc.Input(
+                id="end-date-input",
+                type="text",
+                value='2020-01-01'
+            ),
+        ])
+    ], className="stock_input"),
 
     # Submit button
     html.Div([
@@ -156,38 +144,20 @@ app.layout = html.Div([
             n_clicks=0,
             children='Submit',
         )
-    ]),
+    ], className="ticker-date-submit-button"),
 
     # Graph Output
-    # html.Div([
-    #     html.Div([
-    #         dcc.Graph(
-    #             id='2-stock-subplot'),
-    #     ], className="six columns"),
-    #     html.Div(
-    #         id='2-stock-df',
-    #         className="six columns"
-    #     ),
-    # ]),
     html.Div([
         html.Div([
-            html.H3('Column 1'),
-            html.Div(
-                id='2-stock-df',
-            ),
-        ], ),
-        html.Div([
-            html.H3('Column 2'),
             dcc.Graph(
                 id='2-stock-subplot'),
-        ], )
-    ])
+        ], ),
+    ]),
+    html.Div(
+        id='2-stock-df',
+    )
+
 ])
-
-
-# app.css.append_css({
-#     'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'
-# })
 
 
 @app.callback(
@@ -219,9 +189,9 @@ def update_fig(n_clicks, input_stock_1, input_stock_2, input_date_start, input_d
 
     fig.append_trace(trace_stock_1, 2, 1)
     fig.append_trace(trace_stock_2, 1, 1)
-    fig['layout'].update(  # height=600, width=1200
-        # title="Graph Comparison: " + str(list_of_companies[0] + " & " + str(list_of_companies[1]))
-    )
+    fig['layout'].update(height=600, width=1200
+                         # title="Graph Comparison: " + str(list_of_companies[0] + " & " + str(list_of_companies[1]))
+                         )
     fig.update_layout(legend_orientation="h")
 
     df_fin_stats = (
@@ -233,9 +203,9 @@ def update_fig(n_clicks, input_stock_1, input_stock_2, input_date_start, input_d
             id='table',
             columns=[{"name": i, "id": i} for i in df_fin_stats.columns],
             data=df_fin_stats.to_dict("rows"),
-            style_table={  # 'width': '1000px',
-                'height': '600px',
-                'textAlign': 'center'},
+            style_table={'width': '1000px',
+                         'height': '60px',
+                         'textAlign': 'center'},
             style_as_list_view=True,
             style_header={
                 'backgroundColor': 'white',
@@ -245,8 +215,7 @@ def update_fig(n_clicks, input_stock_1, input_stock_2, input_date_start, input_d
                 {
                     'textAlign': 'center'
                 }
-            ],
-            style_cell={'fontSize': 20, },
+            ]
         )
     ])
 
