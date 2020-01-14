@@ -1,7 +1,7 @@
 # StockComparisonStatisticsApplication
-I noticed that it isn't easy to find basic information on a stock over a given time range. 
+I noticed that it isn't easy to find basic information on a stock over a specified time range. 
 Using pandas_datareader and yahoo finance on the backend, this application allows the user to derive some key 
-statistics on a stock's price given a specified time-frame. 
+statistics on a stock's price for any valid timeframe.
 
 # Required Python packages
 - import pandas as pd
