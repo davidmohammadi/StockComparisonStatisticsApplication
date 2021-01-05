@@ -3,6 +3,8 @@ I noticed that it isn't easy to find basic information on a stock over a specifi
 Using pandas_datareader and yahoo finance on the backend, this application allows the user to derive some key 
 statistics on a stock's price for any valid timeframe.
 
+![](assets/stock-comparison-statistics-application-img.png)
+
 # Required Python packages
 - import pandas as pd
 - import numpy as np
